@@ -664,7 +664,6 @@ function toTime(date: string) {
     return _date.toLocaleString('de-DE', {
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
         hour12: false,
         timeZone: 'Europe/Vienna'
     });
