@@ -241,7 +241,7 @@ let initDays: IDays = [
     }
 ];
 
-if(true || localStorage.getItem('days') === null) {
+if(localStorage.getItem('days') === null) {
     setDays(initDays);
 } else {
     const today = toDate(new Date());
