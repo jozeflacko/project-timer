@@ -374,10 +374,10 @@ export default function Foo() {
                             day.end = new Date().toISOString();
 
                             day.projects.forEach(project => {
-                                project.time = calculaterRunningTime(project.time, project.startTime);
+                                project.time = calculateRunningTime(project.time, project.startTime);
                                 project.startTime = null;
                                 project.tasks?.forEach(t => {
-                                    t.time = calculaterRunningTime(t.time, t.startTime);
+                                    t.time = calculateRunningTime(t.time, t.startTime);
                                     t.startTime = null;
                                 });
                             });
@@ -403,7 +403,7 @@ export default function Foo() {
                                     project.startTime = null;
                                     project.time = projectTime;
                                     project.tasks?.forEach(t => {
-                                        t.time = calculaterRunningTime(t.time, t.startTime);
+                                        t.time = calculateRunningTime(t.time, t.startTime);
                                         t.startTime = null;
                                     });
                                     day.end = '';
@@ -416,11 +416,12 @@ export default function Foo() {
 
 
                                     day.projects.forEach(p => {
+                                        p.time = calculateRunningTime(p.time, p.startTime);
+                                        p.startTime = null;
                                         p.tasks?.forEach(t => {
-                                            t.time = calculaterRunningTime(t.time, t.startTime);
+                                            t.time = calculateRunningTime(t.time, t.startTime);
                                             t.startTime = null;
                                         });
-                                        p.startTime = null;
                                     });
 
                                     project.startTime = new Date();
@@ -479,11 +480,11 @@ export default function Foo() {
 
 
                                             day.projects.forEach(p => {
-                                                p.time = calculaterRunningTime(p.time, p.startTime);
+                                                p.time = calculateRunningTime(p.time, p.startTime);
                                                 p.startTime = null;
 
                                                 p.tasks?.forEach(t => {
-                                                    t.time = calculaterRunningTime(t.time, t.startTime);
+                                                    t.time = calculateRunningTime(t.time, t.startTime);
                                                     t.startTime = null;
                                                 });
                                             });
@@ -618,7 +619,7 @@ function toHours(seconds: number) {
     return Number((seconds / (60*60)).toFixed(2));
 }
 
-function calculaterRunningTime(savedTimeSeconds: number, startTime: null | Date) {
+function calculateRunningTime(savedTimeSeconds: number, startTime: null | Date) {
     const now = new Date();
     if(startTime === null) {
         return savedTimeSeconds;
@@ -636,7 +637,7 @@ function calculateTime(savedTimeSeconds: number, startTime: null | Date) {
         ?
         Number(savedTimeSeconds)
         :
-        calculaterRunningTime(savedTimeSeconds, startTime)
+        calculateRunningTime(savedTimeSeconds, startTime)
 
 }
 
