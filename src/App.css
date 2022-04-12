@@ -1,7 +1,43 @@
+html, body {
+    padding: 0;
+    margin: 0;
+    box-sizing:border-box;
+    background: #DDD;
+}
 
+.app {
+    max-width: 300px;
+    margin:auto;
+    background: white;
+}
 
+.app-name {
+    height: 20px;
+    font-size: 20px;
+    margin: 0;
+    color: black;
+}
+
+.days {
+    padding: 10px;
+}
+
+.today-header {
+   
+}
+
+.today-header h3 {
+    margin: 0;
+    margin-bottom: 5px;
+}
+
+.today-header .start-end {
+    display:flex;
+
+}
 .start-field, .end-field {
     margin-bottom: 10px;
+    width: 100%;
 }
 
 .start-field div, .end-field div {
@@ -30,71 +66,70 @@
 
 
 .projects {
-    text-transform: uppercase;
 }
 
 .projects, .projects * {
     box-spacing:border-box;
 }
 
+.day.history {
+    margin-bottom: 1em;
+}
+
 .project {
     display:flex;
-    flex-direction: row;
-    overflow:hidden;
-    outline: 1px solid white;
+    border: 1px solid #EEE;
+    border-radius: 5px;
+    box-shadow: 3px 3px 3px #e6e6e64f;
+    flex-direction: column;
     position: relative;
+    margin-bottom: 0.5em;
+    border-left: 6px solid white;
 }
 
 .project.history {
-}
-
-.project.history:nth-child(odd) {
-    background: #f2f2f2;
+    display:flex;
+    border: none;
+    flex-direction:row;
+    box-shadow: none;
+    border-bottom: 1px solid #eee;
+    border-radius:0;
 }
 
 .project.history > span {
     flex: 1;
-
 }
 
-
-
-
 .description {
-    background: #ccc;
-    color: #777;
+    color: inherit;
     flex: 1;
-    padding: .4em;
     cursor: pointer;
-    overflow:hidden;
+    padding: 5px;
 }
 
 .tasks {
     flex:1;
 }
 
-.project.running .description {
-    background: #85bf89;
-    color: #2b2e37;
+.project.running {
     overflow: hidden;
 }
 
 .task {
-    background: #f2f2f2;
     color: #777;
-    padding: .4em;
-    min-height: 50px;
+    padding: 5px;
     cursor: pointer;
     position: relative;
+    border-top: 1px solid #f2f2f2;
 }
 
 .task:nth-child(odd) {
-    background: #e7e7e7;
 }
 
 .task.running {
-    background: #85bf89;
-    color: #2b2e37;
+
+    background: #DDD;
+    
 }
 
 button {
@@ -107,7 +142,6 @@ button {
     align-items:center;
     min-height: 60px;
     width: 100%;
-    text-transform: uppercase;
     transition: all 400ms;
 }
 button:hover {
@@ -128,8 +162,8 @@ button.delete {
     position: absolute;
     justify-content: center;
     align-items: center;
-    top: 2px;
-    right: 2px;
+    top: 0px;
+    right: 0px;
 }
 button.delete:hover {
     background: white;
@@ -147,14 +181,17 @@ button.stop {
 }
 
 .name {
-    display: block;
+    display: inline-block;
     cursor: inherit;
+    text-transform: uppercase;
 }
 
 .time {
-    display: block;
-    font-size: 1.5em;
+    display: inline-block;
     cursor: inherit;
+    margin-right: 5px;
+    color: black;
+    text-align:center;
 }
 
 .running {
@@ -194,8 +231,6 @@ button.stop {
     flex-direction: column;
     flex-wrap: wrap;
     margin-bottom: 1em;
-    border: 1px solid #DDD;
-    padding: 0 10px 10px 10px;
 }
 
 .new div {
@@ -206,7 +241,6 @@ button.stop {
 
 .new input {
     font-size: 16px;
-    text-transform: uppercase;
 }
 
 .new select {
@@ -222,6 +256,25 @@ button.stop {
     color: #777;
 }
 
+.new button.open-add-new {
+    font-size: 4em;
+    line-height: 1em;
+    width: 70px;
+    height: 70px;
+    padding: 0;
+    background: transparent;
+    border-radius: 50%;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #eee;
+}
+
+.new button.open-add-new:hover {
+    background: #eee;
+    color: black;
+}
+
 .new button:hover {
     background: green;
     color: white;
@@ -230,14 +283,40 @@ button.stop {
 .day {
     position: relative;
 }
+.days.history {
+    padding: 0;
+}
+
 .day.history {
-    border: 1px solid #DDD;
     margin-bottom: 10px;
-    padding: 10px;
+}
+
+.day.history h3 {
+    margin: 0;
+    padding: 0;
+    font-size:16px;
 }
 
 div.hint {
     font-size: 0.6em;
     color: #afafaf;
     margin: 2px 0;
+}
+
+.icon-button {
+    margin: 0 5px;
+    width: 40px;
+    min-height: 0;
+    height: 40px;
+    display: inline-flex;
+    justify-content: center;
+    align-items:center;
+    border-radius: 50%;
+    transition: 1s;
+    font-size: 20px;
+    background: transparent;
+}
+
+.icon-button:hover {
+    background: #EEE;
 }
