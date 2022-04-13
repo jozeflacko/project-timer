@@ -1,269 +1,20 @@
 import React from 'react';
 import './App.css';
-
-interface ITask {
-    name: string,
-    time: number,
-    startTime: null | Date,
-}
-
-interface IProject {
-    name: string,
-    time: number,
-    startTime: null | Date,
-    tasks?: ITask[],
-}
+import {IDays} from "./interfaces";
+import {
+    getDays,
+    initLocalStorage,
+    setDays,
+    stopPropagation,
+    toDate,
+    roundSecondsToMinutes,
+    round,
+    toHours, calculateRunningTime, toTime, toHHMMSS, calculateTime, getColor
+} from "./helpers";
 
 let timer: any = null;
-interface IDay {
-    date: string,
-    start: string;
-    end: string;
-    projects: IProject[];
-    isHoliday?: boolean;
-}
 
-type IDays = IDay[];
-let initDays: IDays = [
-    {
-        date: toDate(new Date()),
-        start: '',
-        end: '',
-        isHoliday: false,
-        projects: [
-            {
-                name: 'scrum-teams',
-                time: 0,
-                startTime: null,
-                tasks: [
-                    {
-                        name: 'daily',
-                        time: 0,
-                        startTime: null,
-                    },
-                    {
-                        name: 'retro',
-                        time: 0,
-                        startTime: null,
-                    },
-                    {
-                        name: 'sprint planing',
-                        time: 0,
-                        startTime: null,
-                    },
-                ]
-            },
-            {
-                name: 'jam',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'pause & coffee',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'Lot-Academy',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'socializing',
-                time: 0,
-                startTime: null,
-            }
-        ],
-    },
-    {
-        date: '4/9/2022',
-        start: '2022-04-09T07:00:58.377Z',
-        end: '2022-04-09T14:00:58.377Z',
-        isHoliday: false,
-        projects: [
-            {
-                name: 'scrum-teams',
-                time: 450,
-                startTime: null,
-                tasks: [
-                    {
-                        name: 'daily',
-                        time: 150,
-                        startTime: null,
-                    },
-                    {
-                        name: 'retro',
-                        time: 0,
-                        startTime: null,
-                    },
-                    {
-                        name: 'C&D Overview',
-                        time: 300,
-                        startTime: null,
-                    },
-                    {
-                        name: 'sprint planing',
-                        time: 0,
-                        startTime: null,
-                    },
-                    {
-                        name: 'architects coffee',
-                        time: 0,
-                        startTime: null,
-                    },
-                    {
-                        name: 'Talk with Emmi',
-                        time: 0,
-                        startTime: null,
-                    }
-                ]
-            },
-            {
-                name: 'jam',
-                time: 1000,
-                startTime: null,
-                tasks: [
-                    {
-                        name: 'refactoring',
-                        time: 200,
-                        startTime: null,
-                    },
-                    {
-                        name: 'LOT-12345',
-                        time: 800,
-                        startTime: null,
-                    }
-                ]
-            },
-            {
-                name: 'OGRelease',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'refreshing',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'Lot-Academy',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'socializing',
-                time: 0,
-                startTime: null,
-            }
-        ],
-    },
-    {
-        date: '4/8/2022',
-        start: '2022-04-08T07:30:58.377Z',
-        end: '2022-04-08T14:00:58.377Z',
-        isHoliday: false,
-        projects: [
-            {
-                name: 'scrum-teams',
-                time: 1450,
-                startTime: null,
-                tasks: [
-                    {
-                        name: 'daily',
-                        time: 150,
-                        startTime: null,
-                    },
-                    {
-                        name: 'retro',
-                        time: 1000,
-                        startTime: null,
-                    },
-                    {
-                        name: 'C&D Overview',
-                        time: 300,
-                        startTime: null,
-                    },
-                    {
-                        name: 'sprint planing',
-                        time: 0,
-                        startTime: null,
-                    },
-                    {
-                        name: 'architects coffee',
-                        time: 0,
-                        startTime: null,
-                    },
-                    {
-                        name: 'Talk with Emmi',
-                        time: 0,
-                        startTime: null,
-                    }
-                ]
-            },
-            {
-                name: 'jam',
-                time: 1000,
-                startTime: null,
-                tasks: [
-                    {
-                        name: 'refactoring',
-                        time: 200,
-                        startTime: null,
-                    },
-                    {
-                        name: 'LOT-12345',
-                        time: 800,
-                        startTime: null,
-                    }
-                ]
-            },
-            {
-                name: 'OGRelease',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'refreshing',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'Lot-Academy',
-                time: 0,
-                startTime: null,
-            },
-            {
-                name: 'socializing',
-                time: 0,
-                startTime: null,
-            }
-        ],
-    }
-];
-
-if (localStorage.getItem('days') == null) {
-    setDays(initDays);
-} else {
-    const today = toDate(new Date());
-    const days = getDays();
-    if (days.length === 0 || days[0].date !== today) {
-        days.unshift(JSON.parse(JSON.stringify(days[0])));
-        setDays(days);
-    }
-}
-
-function setDays(days: IDays) {
-    localStorage.setItem('days', JSON.stringify(days));
-}
-
-function getDays(): IDays {
-    const _d = localStorage.getItem('days') + '';
-    return JSON.parse(_d);
-}
-
-function toDate(date: Date) {
-    return date.toLocaleDateString("en-US");
-}
+initLocalStorage();
 
 export default function Foo() {
 
@@ -283,7 +34,7 @@ export default function Foo() {
                     if (t.startTime != null) {
                         taskRunning = t.name;
                     }
-                })
+                });
             }
         });
         setRunning([projectRunning, taskRunning]);
@@ -304,14 +55,14 @@ export default function Foo() {
             setRandom(Math.random());
             timer = setInterval(() => {
                 render(getDays());
-            }, 500);
+            }, 1000);
         }
     }, [running]);
 
 
 
     return <div className={'app'}>
-        <div className={'app-name'}>CATS Timer</div>
+        <div className={'app-name'}>⧖ CATS Timer</div>
         <div className={'days'}>
 
             {days.filter(d => d.date === toDate(new Date())).map(day => {
@@ -322,31 +73,33 @@ export default function Foo() {
                         <div className={'start-end'}>
                             <div className={'start-field'}>
                                 <div>Start of the work day</div>
-                                <input
-                                    className={day.start !== '' && day.end === '' ? 'running' : ''}
-                                    onChange={event => {
-                                        const value = event.target.value;
-                                        if (value !== '') {
-                                            try {
-                                                const start = new Date();
-                                                const timeArray = (value + '').split(':');
-                                                start.setHours(Number(timeArray[0]));
-                                                start.setMinutes(Number(timeArray[1]));
-                                                start.setSeconds(Number(timeArray[2]));
-                                                const startISOString = start.toISOString();
-                                                day.start = startISOString;
-                                            } catch (e) {
+                                <div className={'stretch'}>
+                                    <input
+                                        className={day.start !== '' && day.end === '' ? 'running' : ''}
+                                        onChange={event => {
+                                            const value = event.target.value;
+                                            if (value !== '') {
+                                                try {
+                                                    const start = new Date();
+                                                    const timeArray = (value + '').split(':');
+                                                    start.setHours(Number(timeArray[0]));
+                                                    start.setMinutes(Number(timeArray[1]));
+                                                    start.setSeconds(Number(timeArray[2]));
+                                                    const startISOString = start.toISOString();
+                                                    day.start = startISOString;
+                                                } catch (e) {
+                                                    day.start = value;
+                                                }
+                                            } else {
                                                 day.start = value;
                                             }
-                                        } else {
-                                            day.start = value;
-                                        }
 
-                                        day.end = '';
-                                        render(days);
-                                    }}
-                                    value={toTime(day.start)}
-                                />
+                                            day.end = '';
+                                            render(days);
+                                        }}
+                                        value={toTime(day.start)}
+                                    />
+                                </div>
                                 <div className={'hint'}>If empty, time will be set automatically when clicking on a project or a task</div>
                             </div>
 
@@ -359,13 +112,15 @@ export default function Foo() {
                             return <div
                                 key={project.name}
                                 className={project.startTime ? 'project running' : 'project'}
-                                style={{borderLeftColor: getColor(index)}}
+                                style={{
+                                    borderLeftColor: getColor(index),
+                                    background: getColor(index) + '10',
+                                }}
                             >
                                 <div
                                     className={'description'}
                                     onClick={areTaskNotEmpty ? undefined : project.startTime ? event => {
                                         // stop project
-
 
                                         project.startTime = null;
                                         project.time = projectTime;
@@ -409,18 +164,14 @@ export default function Foo() {
 
                                     <div>
                                         {!areTaskNotEmpty && <button className={'icon-button'} onClick={e => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            e.nativeEvent.stopImmediatePropagation();
-                                            project.time = project.time - (1 * 60);
+                                            stopPropagation(e);
+                                            project.time = roundSecondsToMinutes(project.time) - (1 * 60);
                                             render(days);
                                         }}>-</button>}
                                         <span className={'time'}>{toHHMMSS(projectTime)}</span>
                                         {!areTaskNotEmpty && <button className={'icon-button'} onClick={e => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            e.nativeEvent.stopImmediatePropagation();
-                                            project.time = project.time + (1 * 60);
+                                            stopPropagation(e);
+                                            project.time = roundSecondsToMinutes(project.time) + (1 * 60);
                                             render(days);
                                         }}>+</button>}
                                     </div>
@@ -494,18 +245,16 @@ export default function Foo() {
                                             <span className={'name'}>{task.name}</span>
                                             <div>
                                                 <button className={'icon-button'} onClick={e => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    e.nativeEvent.stopImmediatePropagation();
-                                                    task.time = task.time - (1 * 60);
+                                                    stopPropagation(e);
+                                                    task.time = roundSecondsToMinutes(task.time) - (1 * 60);
+                                                    project.time = roundSecondsToMinutes(project.time) - (1 * 60);
                                                     render(days);
                                                 }}>-</button>
                                                 <span className={'time'}>{toHHMMSS(taskTime)}</span>
                                                 <button className={'icon-button'} onClick={e => {
-                                                    e.preventDefault();
-                                                    e.stopPropagation();
-                                                    e.nativeEvent.stopImmediatePropagation();
-                                                    task.time = task.time + (1 * 60);
+                                                    stopPropagation(e);
+                                                    task.time = roundSecondsToMinutes(task.time) + (1 * 60);
+                                                    project.time = roundSecondsToMinutes(project.time) + (1 * 60);
                                                     render(days);
                                                 }}>+</button>
                                             </div>
@@ -589,48 +338,50 @@ export default function Foo() {
                     </div>
                     <div className={'end-field'}>
                         <div>End of the work day</div>
-                        <input
-                            className={day.end !== '' ? 'stop' : ''}
-                            onChange={event => {
-                                const value = event.target.value;
-                                if (value !== '') {
-                                    try {
-                                        const end = new Date();
-                                        const timeArray = (value + '').split(':');
-                                        end.setHours(Number(timeArray[0]));
-                                        end.setMinutes(Number(timeArray[1]));
-                                        end.setSeconds(Number(timeArray[2]));
-                                        const startISOString = end.toISOString();
-                                        day.end = startISOString;
-                                    } catch (e) {
+                        <div className={'stretch'}>
+                            <input
+                                className={day.end !== '' ? 'stop' : ''}
+                                onChange={event => {
+                                    const value = event.target.value;
+                                    if (value !== '') {
+                                        try {
+                                            const end = new Date();
+                                            const timeArray = (value + '').split(':');
+                                            end.setHours(Number(timeArray[0]));
+                                            end.setMinutes(Number(timeArray[1]));
+                                            end.setSeconds(Number(timeArray[2]));
+                                            const startISOString = end.toISOString();
+                                            day.end = startISOString;
+                                        } catch (e) {
+                                            day.end = value;
+                                        }
+                                    } else {
                                         day.end = value;
                                     }
-                                } else {
-                                    day.end = value;
-                                }
-                                render(days);
-                            }}
-                            value={toTime(day.end)}
-                        />
-                        <button
-                            className={day.end !== '' ? 'stop' : ''}
-                            onClick={() => {
-                                day.end = new Date().toISOString();
+                                    render(days);
+                                }}
+                                value={toTime(day.end)}
+                            />
+                            <button
+                                className={day.end !== '' ? 'stop' : ''}
+                                onClick={() => {
+                                    day.end = new Date().toISOString();
 
-                                day.projects.forEach(project => {
-                                    project.time = calculateRunningTime(project.time, project.startTime);
-                                    project.startTime = null;
-                                    project.tasks ?.forEach(t => {
-                                        t.time = calculateRunningTime(t.time, t.startTime);
-                                        t.startTime = null;
+                                    day.projects.forEach(project => {
+                                        project.time = calculateRunningTime(project.time, project.startTime);
+                                        project.startTime = null;
+                                        project.tasks ?.forEach(t => {
+                                            t.time = calculateRunningTime(t.time, t.startTime);
+                                            t.startTime = null;
+                                        });
                                     });
-                                });
-                                setRunning(['', '']);
-                                render(days);
-                            }}
-                        >
-                            end
-                        </button>
+                                    setRunning(['', '']);
+                                    render(days);
+                                }}
+                            >
+                                end
+                            </button>
+                        </div>
                         <div className={'hint'}>Value will always be removed when project or task will be started</div>
                     </div>
                 </div>;
@@ -668,70 +419,3 @@ export default function Foo() {
     </div>;
 }
 
-function toHours(seconds: number) {
-    return Number((seconds / (60 * 60)).toFixed(2));
-}
-
-function calculateRunningTime(savedTimeSeconds: number, startTime: null | Date) {
-    const now = new Date();
-    if (startTime === null) {
-        return savedTimeSeconds;
-    }
-    return (
-        Math.floor(Number(savedTimeSeconds) + (
-            (
-                now.getTime() - new Date(startTime).getTime()
-            ) / 1000
-        ))
-    )
-}
-function calculateTime(savedTimeSeconds: number, startTime: null | Date) {
-    return startTime === null
-        ?
-        Number(savedTimeSeconds)
-        :
-        calculateRunningTime(savedTimeSeconds, startTime)
-
-}
-
-function toHHMMSS(secs: number) {
-    var sec_num = parseInt(secs + '', 10)
-    var hours = Math.floor(sec_num / 3600)
-    var minutes = Math.floor(sec_num / 60) % 60
-    var seconds = sec_num % 60
-
-    return [hours, minutes, seconds]
-        .map(v => v < 10 ? "0" + v : v)
-        .filter((v, i) => v !== "00" || i > 0)
-        .join(":")
-}
-
-
-function toTime(date: string) {
-    if (date === '') {
-        return '';
-    }
-    let _date = new Date(date);
-    if (_date.toString() === 'Invalid Date') {
-        return date;
-    }
-    return _date.toLocaleString('de-DE', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-        timeZone: 'Europe/Vienna'
-    });
-}
-
-function round(value: number, step: number = 0.1) {
-    step || (step = 1.0);
-    var inv = 1.0 / step;
-    return Math.round(value * inv) / inv;
-}
-
-function getColor(index: number) {
-        return ['#4B3E4D', '#D74F33', '#7C0380', '#CC0099', '#FF6600', '#1E8C93', '#009900', '#D74F33',
-            '#D31900', '#2F0093', '#CC3300', '#002254', '#9d0000', '#006B8F', '#3f0e0e', '#0066FF',
-            '#338533', '#0066CC'
-        ][index];
-}

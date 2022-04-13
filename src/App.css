@@ -3,7 +3,23 @@ html, body {
     margin: 0;
     box-sizing:border-box;
     background: #DDD;
+    font-family: monospace;
 }
+
+button, input {
+    font-family: monospace;
+    text-transform: uppercase;
+}
+
+.stretch {
+    display: flex;
+    flex-direction: row;
+}
+
+.stretch > *:first-child {
+    flex:1;
+}
+
 
 .app {
     max-width: 300px;
@@ -16,6 +32,7 @@ html, body {
     font-size: 20px;
     margin: 0;
     color: black;
+    padding: 0 10px;
 }
 
 .days {
