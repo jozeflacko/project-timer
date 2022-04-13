@@ -38,6 +38,7 @@ export function initLocalStorage() {
 
             const newDay: IDay = JSON.parse(JSON.stringify(lastSaved));
 
+            newDay.date = today;
             newDay.start = '';
             newDay.end = '';
             newDay.projects.forEach(p => {
