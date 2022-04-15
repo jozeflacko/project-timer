@@ -11,6 +11,8 @@ import {
     round,
     toHours, calculateRunningTime, toTime, toHHMMSS, calculateTime, getColor
 } from "./helpers";
+import useLongPress from './useLongPress';
+
 
 let timer: any = null;
 
@@ -21,7 +23,125 @@ export default function Foo() {
     let days = getDays();
 
     const [running, setRunning] = React.useState(['', '']);
-    const [isAddNewOpen, setIsAddNewOpen] = React.useState(false);
+
+    function handleClickOnDays(event: any, isLongPress = false) {
+        const el = event.target.closest('.action');
+        if(el == null) {
+            return;
+        }
+        const classList = el.classList;
+        const projectIndex = Number(el.getAttribute('data-project-index'));
+        const taskIndex = Number(el.getAttribute('data-task-index'));
+        const dayIndex = Number(el.getAttribute('data-day-index'));
+        const days = getDays();
+        const day = days[dayIndex];
+        const project = days[dayIndex].projects[projectIndex];
+        const areTaskNotEmpty = project.tasks && project.tasks.length > 0;
+        const tasks = project.tasks || [];
+        const task = tasks[taskIndex];
+        const projectTime = project ? calculateTime(project.time, project.startTime) : 0;
+        const taskTime = task ? calculateTime(task.time, task.startTime) : 0;
+
+            if(classList.contains('delete')) {
+                if (confirm("Are you sure!") == false) {
+                    event.preventDefault();
+                    return;
+                }
+                if(classList.contains('project-button')) {
+                    day.projects = day.projects.filter(p => p.name !== project.name);
+                } else if(classList.contains('task-button')) {
+                    project.tasks = project ?.tasks ?.filter(t => t.name !== task.name);
+                }
+                render(days);
+            }
+            else if(classList.contains('task-button') && classList.contains('start-stop')) {
+                if(task.startTime) {
+                    console.log('task button -> stop')
+                    project.startTime = null;
+                    project.time = projectTime;
+                    task.startTime = null;
+                    task.time = taskTime;
+                    setRunning(['', '']);
+                } else {
+                    console.log('task button -> start')
+                    day.projects.forEach((project, projectIndex) => {
+                        project.time = calculateRunningTime(project.time, project.startTime);
+                        project.startTime = null;
+                        project.tasks ?.forEach(t => {
+                            t.time = calculateRunningTime(t.time, t.startTime);
+                            t.startTime = null;
+                        });
+                    });
+                    project.startTime = new Date();
+                    task.startTime = new Date();
+                    setRunning([project.name, task.name]);
+                }
+                render(days);
+            } else if(classList.contains('project-button') && classList.contains('start-stop')) {
+                if(!areTaskNotEmpty) {
+                    if(project.startTime) {
+                        console.log('project button -> stop');
+                        project.startTime = null;
+                        project.time = projectTime;
+                        project.tasks ?.forEach(t => {
+                            t.time = calculateRunningTime(t.time, t.startTime);
+                            t.startTime = null;
+                        });
+                        setRunning(['', '']);
+                    } else {
+                        console.log('project button -> start')
+                        day.projects.forEach(p => {
+                            p.time = calculateRunningTime(p.time, p.startTime);
+                            p.startTime = null;
+                            p.tasks ?.forEach(t => {
+                                t.time = calculateRunningTime(t.time, t.startTime);
+                                t.startTime = null;
+                            });
+                        });
+                        project.startTime = new Date();
+                        project.time = projectTime;
+                        setRunning([project.name, '']);
+                    }
+                    render(days);
+                }
+            } else if(classList.contains('edit-time') && (classList.contains('project-button') || classList.contains('task-button'))) {
+                const minutes = isLongPress ? 10 : 1;
+                console.log(isLongPress ? 'is long press': 'is click');
+
+                let canUpdateProject = true;
+                if(classList.contains('task-button')){
+                    if(classList.contains('plus')) {
+                        task.time = roundSecondsToMinutes(task.time) + (minutes * 60);
+                    } else {
+                        const v = roundSecondsToMinutes(task.time);
+                        if(v === 0) {
+                            canUpdateProject = false;
+                            task.time = v;
+                        } else {
+                            task.time = v - (minutes * 60);
+                        }
+                    }
+                }
+                if(canUpdateProject) {
+                    if(classList.contains('plus')) {
+                        project.time = roundSecondsToMinutes(project.time) + (minutes * 60);
+                    } else {
+                        project.time = roundSecondsToMinutes(project.time) - (minutes * 60);
+                    }
+                }
+                render(days);
+            }
+
+    }
+
+    const handleClickAndLongPress = useLongPress({
+        onLongPress: (event) => {
+            handleClickOnDays(event, true);
+        },
+        onClick: (event) => {
+            handleClickOnDays(event, false);
+        }
+    });
 
     React.useEffect(() => {
         const today = days[0];
@@ -61,216 +181,124 @@ export default function Foo() {
 
 
 
-    return <div className={'app'}>
-        <div className={'app-name'}>⧖ CATS Timer</div>
+    return <div
+        className={'app'}
+    >
+        <div className={'app-name'}>/ᐠ｡ꞈ｡ᐟ\ CATS Timer</div>
         <div className={'days'}>
 
-            {days.filter(d => d.date === toDate(new Date())).map(day => {
-                return <div className={'day'} key={day.date}>
+            {days.filter(d => d.date === toDate(new Date())).map((day, dayIndex) => {
+                return <div
+                    className={'day'}
+                    key={day.date}
+                >
 
                     <div className={'today-header'}>
                         <h3>Today {day.date}</h3>
-                        <div className={'start-end'}>
-                            <div className={'start-field'}>
-                                <div>Start of the work day</div>
-                                <div className={'stretch'}>
-                                    <input
-                                        className={day.start !== '' && day.end === '' ? 'running' : ''}
-                                        onChange={event => {
-                                            const value = event.target.value;
-                                            if (value !== '') {
-                                                try {
-                                                    const start = new Date();
-                                                    const timeArray = (value + '').split(':');
-                                                    start.setHours(Number(timeArray[0]));
-                                                    start.setMinutes(Number(timeArray[1]));
-                                                    start.setSeconds(Number(timeArray[2]));
-                                                    const startISOString = start.toISOString();
-                                                    day.start = startISOString;
-                                                } catch (e) {
-                                                    day.start = value;
-                                                }
-                                            } else {
-                                                day.start = value;
-                                            }
-
-                                            day.end = '';
-                                            render(days);
-                                        }}
-                                        value={toTime(day.start)}
-                                    />
-                                </div>
-                                <div className={'hint'}>If empty, time will be set automatically when clicking on a project or a task</div>
-                            </div>
-
-                        </div>
                     </div>
-                    <div className={'projects'}>
-                        {day.projects.map((project, index) => {
+                    <div
+                        className={'projects'}
+                        {...handleClickAndLongPress}
+                    >
+                        {day.projects.map((project, projectIndex) => {
                             const areTaskNotEmpty = project.tasks && project.tasks.length > 0;
                             const projectTime = calculateTime(project.time, project.startTime);
                             return <div
                                 key={project.name}
-                                className={project.startTime ? 'project running' : 'project'}
+                                className={project.startTime ? 'action start-stop project-button project running' : 'action start-stop project-button project'}
+                                data-project-name={project.name}
+                                data-project-index={projectIndex}
+                                data-day-index={0}
                                 style={{
-                                    borderLeftColor: getColor(index),
-                                    background: getColor(index) + '10',
+                                    borderLeftColor: getColor(projectIndex),
+                                    borderRightColor: project.startTime ? getColor(projectIndex) : undefined,
+                                    borderTopColor: project.startTime ? getColor(projectIndex) : undefined,
+                                    borderBottomColor: project.startTime ? getColor(projectIndex) : undefined,
+
+                                    background: getColor(projectIndex) + '10',
                                 }}
                             >
                                 <div
                                     className={'description'}
-                                    onClick={areTaskNotEmpty ? undefined : project.startTime ? event => {
-                                        // stop project
-
-                                        project.startTime = null;
-                                        project.time = projectTime;
-                                        project.tasks ?.forEach(t => {
-                                            t.time = calculateRunningTime(t.time, t.startTime);
-                                            t.startTime = null;
-                                        });
-                                        day.end = '';
-
-                                        setRunning(['', '']);
-                                        render(days);
-                                        event.preventDefault();
-                                    } : event => {
-                                        // start project
-
-
-                                        day.projects.forEach(p => {
-                                            p.time = calculateRunningTime(p.time, p.startTime);
-                                            p.startTime = null;
-                                            p.tasks ?.forEach(t => {
-                                                t.time = calculateRunningTime(t.time, t.startTime);
-                                                t.startTime = null;
-                                            });
-                                        });
-
-                                        project.startTime = new Date();
-                                        project.time = projectTime;
-
-                                        if (day.start === '') {
-                                            day.start = new Date().toISOString();
-                                        }
-
-                                        day.end = '';
-
-                                        setRunning([project.name, '']);
-                                        render(days);
-                                        event.preventDefault();
-                                    }}
                                 >
+
                                     <span className={'name'}>{project.name}</span>
 
-                                    <div>
-                                        {!areTaskNotEmpty && <button className={'icon-button'} onClick={e => {
-                                            stopPropagation(e);
-                                            project.time = roundSecondsToMinutes(project.time) - (1 * 60);
-                                            render(days);
-                                        }}>-</button>}
-                                        <span className={'time'}>{toHHMMSS(projectTime)}</span>
-                                        {!areTaskNotEmpty && <button className={'icon-button'} onClick={e => {
-                                            stopPropagation(e);
-                                            project.time = roundSecondsToMinutes(project.time) + (1 * 60);
-                                            render(days);
-                                        }}>+</button>}
+                                    <div className={'time-container'}>
+                                        {!areTaskNotEmpty && <button
+                                            className={`action edit-time project-button icon-button minus`}
+                                            data-project-name={project.name}
+                                            data-project-index={projectIndex}
+                                            data-day-index={0}
+                                        >-</button>}
+                                        <span
+                                            className={'time'}
+                                        >
+                                            {toHHMMSS(projectTime)}
+                                            {project.startTime && (project.tasks == null || project.tasks.length === 0) && <div className={'runner'}></div>}
+                                        </span>
+                                        {!areTaskNotEmpty && <button
+                                            className={`action edit-time project-button icon-button plus`}
+                                            data-project-name={project.name}
+                                            data-project-index={projectIndex}
+                                            data-day-index={dayIndex}
+                                        >+</button>}
                                     </div>
 
 
                                     {!areTaskNotEmpty && <button
-                                        className={'delete'}
-                                        onClick={event => {
-                                            if (confirm("Are you sure!") == false) {
-                                                event.preventDefault();
-                                                return;
-                                            }
-                                            day.projects = day.projects.filter(p => p.name !== project.name);
-                                            render(days);
-                                        }}
+                                        className={'action project-button delete'}
+                                        data-project-name={project.name}
+                                        data-project-index={projectIndex}
+                                        data-day-index={dayIndex}
                                     >
-                                        +
+                                        <DeleteIcon/>
                                 </button>}
                                 </div>
                                 {areTaskNotEmpty && <div className={'tasks'}>
-                                    {project.tasks ?.map(task => {
+                                    {project.tasks ?.map((task, taskIndex) => {
                                         const taskTime = calculateTime(task.time, task.startTime);
                                         return <div
                                             key={task.name}
-                                            className={task.startTime ? 'task running' : 'task'}
-                                            onClick={task.startTime ? event => {
-                                                // stop task
-
-                                                project.startTime = null;
-                                                project.time = projectTime;
-                                                task.startTime = null;
-                                                task.time = taskTime;
-                                                day.end = '';
-
-                                                setRunning(['', '']);
-                                                render(days);
-
-                                                event.preventDefault();
-
-
-                                            } : event => {
-                                                // start task
-
-
-                                                day.projects.forEach(p => {
-                                                    p.time = calculateRunningTime(p.time, p.startTime);
-                                                    p.startTime = null;
-
-                                                    p.tasks ?.forEach(t => {
-                                                        t.time = calculateRunningTime(t.time, t.startTime);
-                                                        t.startTime = null;
-                                                    });
-                                                });
-
-                                                project.startTime = new Date();
-                                                task.startTime = new Date();
-
-                                                if (day.start === '') {
-                                                    day.start = new Date().toISOString();
-                                                }
-
-                                                day.end = '';
-
-                                                setRunning([project.name, task.name]);
-                                                render(days);
-
-                                                event.preventDefault();
-                                            }
-                                            }
+                                            className={task.startTime ? 'action start-stop task-button task running' : 'action start-stop task-button task'}
+                                            data-project-name={project.name}
+                                            data-project-index={projectIndex}
+                                            data-task-index={taskIndex}
+                                            data-day-index={dayIndex}
                                         >
                                             <span className={'name'}>{task.name}</span>
-                                            <div>
-                                                <button className={'icon-button'} onClick={e => {
-                                                    stopPropagation(e);
-                                                    task.time = roundSecondsToMinutes(task.time) - (1 * 60);
-                                                    project.time = roundSecondsToMinutes(project.time) - (1 * 60);
-                                                    render(days);
-                                                }}>-</button>
-                                                <span className={'time'}>{toHHMMSS(taskTime)}</span>
-                                                <button className={'icon-button'} onClick={e => {
-                                                    stopPropagation(e);
-                                                    task.time = roundSecondsToMinutes(task.time) + (1 * 60);
-                                                    project.time = roundSecondsToMinutes(project.time) + (1 * 60);
-                                                    render(days);
-                                                }}>+</button>
+                                            <div className={'time-container'}>
+                                                <button
+                                                    className={`action edit-time task-button icon-button minus`}
+                                                    data-project-name={project.name}
+                                                    data-project-index={projectIndex}
+                                                    data-task-index={taskIndex}
+                                                    data-day-index={dayIndex}
+                                                >-</button>
+
+                                                <span
+                                                    className={'time'}
+                                                >
+                                                    {toHHMMSS(taskTime)}
+                                                    {task.startTime && <div className={'runner'} />}
+                                                </span>
+                                                <button
+                                                    className={'action edit-time task-button icon-button plus'}
+                                                    data-project-name={project.name}
+                                                    data-project-index={projectIndex}
+                                                    data-task-index={taskIndex}
+                                                    data-day-index={dayIndex}
+                                                >+</button>
                                             </div>
 
                                             <button
-                                                className={'delete'}
-                                                onClick={event => {
-                                                    if (confirm("Are you sure!") == false) {
-                                                        event.preventDefault();
-                                                        return;
-                                                    }
-                                                    project.tasks = project ?.tasks ?.filter(t => t.name !== task.name);
-                                                    render(days);
-                                                }}
+                                                className={'action task-button delete'}
+                                                data-project-name={project.name}
+                                                data-project-index={projectIndex}
+                                                data-task-index={taskIndex}
+                                                data-day-index={dayIndex}
                                             >
-                                                +
+                                                <DeleteIcon/>
                                         </button>
                                         </div>
                                     })}
@@ -278,18 +306,16 @@ export default function Foo() {
                             </div>;
                         })}
                         <div className={'new'}>
-                            <button className={'open-add-new'} onClick={()=>{
-                                setIsAddNewOpen(!isAddNewOpen);
-                            }}>+</button>
-                            <div style={{display: isAddNewOpen ? 'block' : 'none'}}>
-                                <div>Project or task name*</div>
+                                <div>
+                                    Name*
+                                </div>
                                 <input
                                     id={'add-new'}
                                     className={'name'}
                                 />
                                 <br />
                                 <div>
-                                    Select project (optional)
+                                    Group (optional)
                                 </div>
                                 <select
                                     id={'projects-selection'}
@@ -332,57 +358,8 @@ export default function Foo() {
                                     }
 
                                     render(days);
-                                }}>+</button>
+                                }}>+ Add new</button>
                             </div>
-                        </div>
-                    </div>
-                    <div className={'end-field'}>
-                        <div>End of the work day</div>
-                        <div className={'stretch'}>
-                            <input
-                                className={day.end !== '' ? 'stop' : ''}
-                                onChange={event => {
-                                    const value = event.target.value;
-                                    if (value !== '') {
-                                        try {
-                                            const end = new Date();
-                                            const timeArray = (value + '').split(':');
-                                            end.setHours(Number(timeArray[0]));
-                                            end.setMinutes(Number(timeArray[1]));
-                                            end.setSeconds(Number(timeArray[2]));
-                                            const startISOString = end.toISOString();
-                                            day.end = startISOString;
-                                        } catch (e) {
-                                            day.end = value;
-                                        }
-                                    } else {
-                                        day.end = value;
-                                    }
-                                    render(days);
-                                }}
-                                value={toTime(day.end)}
-                            />
-                            <button
-                                className={day.end !== '' ? 'stop' : ''}
-                                onClick={() => {
-                                    day.end = new Date().toISOString();
-
-                                    day.projects.forEach(project => {
-                                        project.time = calculateRunningTime(project.time, project.startTime);
-                                        project.startTime = null;
-                                        project.tasks ?.forEach(t => {
-                                            t.time = calculateRunningTime(t.time, t.startTime);
-                                            t.startTime = null;
-                                        });
-                                    });
-                                    setRunning(['', '']);
-                                    render(days);
-                                }}
-                            >
-                                end
-                            </button>
-                        </div>
-                        <div className={'hint'}>Value will always be removed when project or task will be started</div>
                     </div>
                 </div>;
             })}
@@ -392,10 +369,14 @@ export default function Foo() {
                     return <div className={'day history'} key={day.date}>
                         <h3>{day.date}</h3>
                         <div>
-                            {day.projects.filter(p => p.time !== 0).map(project => {
+                            {day.projects.map(project => {
+                                const time = round(toHours(project.time), 0.5);
+                                if(time === 0) {
+                                    return null;
+                                }
                                 return <div className={'project history'} key={project.name}>
                                     <span>{project.name}</span>
-                                    <span>{round(toHours(project.time), 0.5)}h</span>
+                                    <span>{time === 0 ? '' : time + 'h'}</span>
                                 </div>
                             })}
                         </div>
@@ -410,7 +391,7 @@ export default function Foo() {
                                 render(days.filter(d => d.date !== day.date));
                             }}
                         >
-                            +
+                            <DeleteIcon/>
                     </button>
                     </div>;
                 })}
@@ -419,3 +400,7 @@ export default function Foo() {
     </div>;
 }
 
+
+function DeleteIcon() {
+    return <img src={'delete-48.png'} />;
+}

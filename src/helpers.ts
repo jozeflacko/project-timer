@@ -62,9 +62,14 @@ export function roundSecondsToMinutes(n: number) {
 }
 
 export function stopPropagation(e: any) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
+   try {
+       e.preventDefault();
+       e.stopPropagation();
+       e.nativeEvent.stopImmediatePropagation();
+   }
+   catch(e) {
+       console.log(e);
+   }
 }
 
 export function toHours(seconds: number) {

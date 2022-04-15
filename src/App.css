@@ -2,7 +2,7 @@ html, body {
     padding: 0;
     margin: 0;
     box-sizing:border-box;
-    background: #DDD;
+    background: white;
     font-family: monospace;
 }
 
@@ -22,7 +22,7 @@ button, input {
 
 
 .app {
-    max-width: 300px;
+    max-width: 600px;
     margin:auto;
     background: white;
 }
@@ -95,13 +95,14 @@ button, input {
 
 .project {
     display:flex;
-    border: 1px solid #EEE;
+    border: 1px solid transparent;
     border-radius: 5px;
     box-shadow: 3px 3px 3px #e6e6e64f;
     flex-direction: column;
     position: relative;
-    margin-bottom: 0.5em;
+    margin-bottom: 1em;
     border-left: 6px solid white;
+    transition: .5s;
 }
 
 .project.history {
@@ -120,8 +121,11 @@ button, input {
 .description {
     color: inherit;
     flex: 1;
-    cursor: pointer;
-    padding: 5px;
+    padding: 8px 8px 20px 8px;
+    background: #dddddd40;
+}
+.description .name {
+    font-weight:bold;
 }
 
 .tasks {
@@ -129,12 +133,12 @@ button, input {
 }
 
 .project.running {
-    overflow: hidden;
+    transform: scale(1.03);
 }
 
 .task {
-    color: #777;
-    padding: 5px;
+    color: black;
+    padding: 8px 8px 20px 8px;
     cursor: pointer;
     position: relative;
     border-top: 1px solid #f2f2f2;
@@ -143,10 +147,15 @@ button, input {
 .task:nth-child(odd) {
 }
 
-.task.running {
+.task.running{
 
     background: #DDD;
     
+}
+
+
+button.delete img {
+    height: 70%;
 }
 
 button {
@@ -167,7 +176,6 @@ button:hover {
 
 button.delete {
     width: 30px;
-    transform: rotate(45deg);
     margin: 0;
     height: 30px;
     min-height: 0;
@@ -179,12 +187,13 @@ button.delete {
     position: absolute;
     justify-content: center;
     align-items: center;
-    top: 0px;
-    right: 0px;
+    top: 19px;
+    opacity: .3;
+    right: 10px;
+    transition: .5s;
 }
 button.delete:hover {
-    background: white;
-    color: red;
+    opacity:1;
 }
 
 button.running {
@@ -198,9 +207,14 @@ button.stop {
 }
 
 .name {
-    display: inline-block;
+    display: block;
     cursor: inherit;
     text-transform: uppercase;
+    font-size: 16px;
+}
+
+.project .name {
+    position: absolute;
 }
 
 .time {
@@ -214,7 +228,16 @@ button.stop {
 .running {
     position: relative;
 }
-.aaarunning::before {
+.running .runner {
+    position: absolute;
+    top: calc( 50% - 5px);
+    left: calc(50% - 5px);
+    width: 1px;
+    height: 1px;
+    background: red;
+}
+
+.running .runner::before {
     content: "";
     position: absolute;
     border: 4px solid #fff;
@@ -222,21 +245,21 @@ button.stop {
     border-radius: 50%;
     animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
-.aaarunning::after {
+.running .runner::after {
     content: "";
     animation-delay: -0.5s;
 }
 @keyframes lds-ripple {
     0% {
-        top: 36px;
-        left: 36px;
+        top: 0px;
+        left: 0px;
         width: 0;
         height: 0;
         opacity: 1;
     }
     100% {
-        top: 0px;
-        left: 0px;
+        top: -36px;
+        left: -36px;
         width: 72px;
         height: 72px;
         opacity: 0;
@@ -248,12 +271,11 @@ button.stop {
     flex-direction: column;
     flex-wrap: wrap;
     margin-bottom: 1em;
+    padding: 1em 0;
 }
 
 .new div {
-    font-size: .7em;
     color: #777;
-    text-transform: default;
 }
 
 .new input {
@@ -266,33 +288,15 @@ button.stop {
 
 .new button {
     text-align: left;
-    background: #DDD;
     margin: 0;
-    width: 60px;
-    font-size: 2em;
-    color: #777;
-}
-
-.new button.open-add-new {
-    font-size: 4em;
+    font-size: 1em;
     line-height: 1em;
-    width: 70px;
-    height: 70px;
     padding: 0;
-    background: transparent;
-    border-radius: 50%;
+    border-radius: 5px;
     display:flex;
     justify-content: center;
     align-items: center;
     border: 1px solid #eee;
-}
-
-.new button.open-add-new:hover {
-    background: #eee;
-    color: black;
-}
-
-.new button:hover {
     background: green;
     color: white;
 }
@@ -305,7 +309,7 @@ button.stop {
 }
 
 .day.history {
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .day.history h3 {
@@ -314,8 +318,16 @@ button.stop {
     font-size:16px;
 }
 
+.day.history button.delete {
+    top: -5px;
+}
+
+.running button.delete {
+
+}
+
 div.hint {
-    font-size: 0.6em;
+    font-size: 0.8em;
     color: #afafaf;
     margin: 2px 0;
 }
@@ -335,5 +347,69 @@ div.hint {
 }
 
 .icon-button:hover {
-    background: #EEE;
+   color: red !important;
+}
+
+.time-container {
+    display: block;
+    text-align: center;
+    position: relative;
+    top:8px;
+}
+
+.time-container .time {
+    margin: 0;
+    padding: 0;
+    width: 80px;
+    position: relative;
+    top: -2px;
+    font-size: 16px;
+    cursor:pointer;
+    transition: .5s;
+    transition-delay: .5s;
+}
+
+.time-container .time:hover {
+    color: red;
+}
+
+.time-container .icon-button {
+    margin: 0;
+    color: #ababab;
+}
+
+.project.running:before {
+    content:"";
+    width:10px;
+    height:10px;
+    position: absolute;
+
+    border-radius: 50%;
+    animation: runAround 100s infinite linear;
+    z-index:10000;
+}
+
+@keyframes runAround {
+    0% {
+        top:-5px;
+        left:-5px;
+    }
+    25% {
+        top:-5px;
+        left: calc(100% - 5px);
+    }
+    50% {
+        left: calc(100% - 5px);
+        top: calc(100% - 5px);
+
+    }
+    75% {
+        top: calc(100% - 5px);
+        left: -5px;
+
+    }
+    100% {
+        top:-5px;
+        left:-5px;
+    }
 }
