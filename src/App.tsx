@@ -184,7 +184,7 @@ export default function Foo() {
     return <div
         className={'app'}
     >
-        <div className={'app-name'}>/ᐠ｡ꞈ｡ᐟ\ CATS Timer</div>
+        <div className={'app-name'}>/ᐠ｡ ｡ᐟ\ CATS Timer</div>
         <div className={'days'}>
 
             {days.filter(d => d.date === toDate(new Date())).map((day, dayIndex) => {
