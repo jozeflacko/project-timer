@@ -127,7 +127,7 @@ export default function Foo() {
                                 numberOfEditedSeconds = 0;
                                 task.time = 0;
                             } else if(roundedMinutes < numberOfEditedSeconds) {
-                                numberOfEditedSeconds = roundedMinutes;
+                                numberOfEditedSeconds = task.time;
                             }
                             task.time = roundedMinutes - numberOfEditedSeconds;
                         }
@@ -142,7 +142,7 @@ export default function Foo() {
                             numberOfEditedSeconds = 0;
                             project.time = 0;
                         } else if(roundedMinutes < numberOfEditedSeconds) {
-                            numberOfEditedSeconds = roundedMinutes;
+                            numberOfEditedSeconds = project.time;
                         }
                         project.time = roundedMinutes - numberOfEditedSeconds;
                     }
