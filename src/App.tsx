@@ -22,7 +22,11 @@ export default function Foo() {
 
     let days = getDays();
 
+    const appName = 'CATS Timer';
+    const removeIntroAfter = (appName.length * 100) + 1500;
+
     const [running, setRunning] = React.useState(['', '']);
+    const [showInto, setShowIntro] = React.useState(false);
 
     function handleClickOnDays(event: any, isLongPress = false) {
         const el = event.target.closest('.action');
@@ -158,6 +162,14 @@ export default function Foo() {
             }
         });
         setRunning([projectRunning, taskRunning]);
+        const showIntro = projectRunning === '' && taskRunning === '';
+        if(showIntro) {
+            setShowIntro(showIntro);
+            setTimeout(()=>{
+                setShowIntro(false);
+            }, removeIntroAfter);
+        }
+
 
     }, []);
 
@@ -179,12 +191,31 @@ export default function Foo() {
         }
     }, [running]);
 
+    let introDelay = 1300;
 
-
-    return <div
-        className={'app'}
-    >
-        <div className={'app-name'}>/ᐠ｡ ｡ᐟ\ CATS Timer</div>
+    return <>
+        {showInto && <div
+            className={'intro'}
+            style={{
+                animation: `moveLetterDown 1s ease-in-out ${removeIntroAfter}ms forwards`,
+            }}
+        >
+            {appName.split('').map((ch, index) => {
+                if(ch !== '') {
+                    introDelay += 80;
+                }
+                return <span
+                    key={ch + index}
+                    style={{
+                        animation: `moveLetterDown 1s ease-in-out ${introDelay}ms forwards`,
+                    }}
+                >{ch}</span>
+            })}
+        </div>}
+        <div
+            className={showInto ? 'app' : 'app show'}
+        >
+        <div className={'app-name'}>/ᐠ｡ ｡ᐟ\ {appName}</div>
         <div className={'days'}>
 
             {days.filter(d => d.date === toDate(new Date())).map((day, dayIndex) => {
@@ -397,7 +428,8 @@ export default function Foo() {
                 })}
             </div>
         </div>
-    </div>;
+    </div>
+        </>;
 }
 
 
