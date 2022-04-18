@@ -23,7 +23,7 @@ export default function Foo() {
     let days = getDays();
 
     const appName = 'CATS Timer';
-    const removeIntroAfter = (appName.length * 100) + 1500;
+    const removeIntroAfter = (appName.length * 100) + 3500;
 
     const [running, setRunning] = React.useState(['', '']);
     const [showInto, setShowIntro] = React.useState(false);
@@ -112,25 +112,39 @@ export default function Foo() {
                 const minutes = isLongPress ? 10 : 1;
                 console.log(isLongPress ? 'is long press': 'is click');
 
+                let numberOfEditedSeconds = minutes * 60;
                 let canUpdateProject = true;
                 if(classList.contains('task-button')){
                     if(classList.contains('plus')) {
-                        task.time = roundSecondsToMinutes(task.time) + (minutes * 60);
+                        task.time = roundSecondsToMinutes(task.time) + numberOfEditedSeconds;
                     } else {
-                        const v = roundSecondsToMinutes(task.time);
-                        if(v === 0) {
+                        const roundedMinutes = roundSecondsToMinutes(task.time);
+                        if(roundedMinutes === 0) {
                             canUpdateProject = false;
-                            task.time = v;
+                            task.time = roundedMinutes;
                         } else {
-                            task.time = v - (minutes * 60);
+                            if(roundedMinutes === 0) {
+                                numberOfEditedSeconds = 0;
+                                task.time = 0;
+                            } else if(roundedMinutes < numberOfEditedSeconds) {
+                                numberOfEditedSeconds = roundedMinutes;
+                            }
+                            task.time = roundedMinutes - numberOfEditedSeconds;
                         }
                     }
                 }
                 if(canUpdateProject) {
                     if(classList.contains('plus')) {
-                        project.time = roundSecondsToMinutes(project.time) + (minutes * 60);
+                        project.time = roundSecondsToMinutes(project.time) + numberOfEditedSeconds;
                     } else {
-                        project.time = roundSecondsToMinutes(project.time) - (minutes * 60);
+                        const roundedMinutes = roundSecondsToMinutes(project.time);
+                        if(roundedMinutes === 0) {
+                            numberOfEditedSeconds = 0;
+                            project.time = 0;
+                        } else if(roundedMinutes < numberOfEditedSeconds) {
+                            numberOfEditedSeconds = roundedMinutes;
+                        }
+                        project.time = roundedMinutes - numberOfEditedSeconds;
                     }
                 }
                 render(days);
@@ -138,14 +152,19 @@ export default function Foo() {
 
     }
 
-    const handleClickAndLongPress = useLongPress({
+    /*(const handleClickAndLongPress = useLongPress({
         onLongPress: (event) => {
             handleClickOnDays(event, true);
         },
         onClick: (event) => {
             handleClickOnDays(event, false);
         }
-    });
+    });*/
+    const handleClickAndLongPress = {
+        onClick: (event: any) => {
+            handleClickOnDays(event, true);
+        }
+    }
 
     React.useEffect(() => {
         const today = days[0];
