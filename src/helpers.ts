@@ -2,7 +2,16 @@ import {IDay, IDays} from "./interfaces";
 import {initDays} from "./initData";
 
 export function toDate(date: Date) {
-    return date.toLocaleDateString("en-US");
+    return formatStringData(date.toLocaleDateString("de-AT"));
+}
+
+export function formatStringData(date: string) {
+    if(date === '') {
+        return date;
+    }
+    const separator = date.indexOf ('.') < 0 ? '/' : '.';
+    const d = date.split(separator);
+    return d[0] + '.' + d[1] + '.';
 }
 
 export function getTodayString() {

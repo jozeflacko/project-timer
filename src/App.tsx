@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import {IDays} from "./interfaces";
+import {IDay, IDays} from "./interfaces";
 import {
     getDays,
     initLocalStorage,
@@ -9,7 +9,7 @@ import {
     toDate,
     roundSecondsToMinutes,
     round,
-    toHours, calculateRunningTime, toTime, toHHMMSS, calculateTime, getColor
+    toHours, calculateRunningTime, toTime, toHHMMSS, calculateTime, getColor, formatStringData
 } from "./helpers";
 import useLongPress from './useLongPress';
 
@@ -27,6 +27,7 @@ export default function Foo() {
 
     const [running, setRunning] = React.useState(['', '']);
     const [showInto, setShowIntro] = React.useState(false);
+    const [editHistory, setEditHistory] = React.useState(false);
 
     function handleClickOnDays(event: any, isLongPress = false) {
         const el = event.target.closest('.action');
@@ -212,32 +213,11 @@ export default function Foo() {
 
     let introDelay = 1300;
 
-    return <>
-        {showInto && <div
-            className={'intro'}
-            style={{
-                animation: `moveLetterDown 1s ease-in-out ${removeIntroAfter}ms forwards`,
-            }}
-        >
-            {appName.split('').map((ch, index) => {
-                if(ch !== '') {
-                    introDelay += 80;
-                }
-                return <span
-                    key={ch + index}
-                    style={{
-                        animation: `moveLetterDown 1s ease-in-out ${introDelay}ms forwards`,
-                    }}
-                >{ch}</span>
-            })}
-        </div>}
-        <div
-            className={showInto ? 'app' : 'app show'}
-        >
-        <div className={'app-name'}>/ᐠ｡ ｡ᐟ\ {appName}</div>
-        <div className={'days'}>
+    const todayInArray = days.filter(d => d.date === toDate(new Date()));
+    const historyDays = days.filter(d => d.date !== toDate(new Date()));
 
-            {days.filter(d => d.date === toDate(new Date())).map((day, dayIndex) => {
+    function renderEditableDays(days: IDay[], dayIndexOffset: number = 0) {
+        return days.map((day, dayIndex) => {
                 return <div
                     className={'day'}
                     key={day.date}
@@ -258,13 +238,12 @@ export default function Foo() {
                                 className={project.startTime ? 'action start-stop project-button project running' : 'action start-stop project-button project'}
                                 data-project-name={project.name}
                                 data-project-index={projectIndex}
-                                data-day-index={0}
+                                data-day-index={dayIndex + dayIndexOffset}
                                 style={{
                                     borderLeftColor: getColor(projectIndex),
                                     borderRightColor: project.startTime ? getColor(projectIndex) : undefined,
                                     borderTopColor: project.startTime ? getColor(projectIndex) : undefined,
                                     borderBottomColor: project.startTime ? getColor(projectIndex) : undefined,
-
                                     background: getColor(projectIndex) + '10',
                                 }}
                             >
@@ -279,7 +258,7 @@ export default function Foo() {
                                             className={`action edit-time project-button icon-button minus`}
                                             data-project-name={project.name}
                                             data-project-index={projectIndex}
-                                            data-day-index={0}
+                                            data-day-index={dayIndex + dayIndexOffset}
                                         >-</button>}
                                         <span
                                             className={'time'}
@@ -291,7 +270,7 @@ export default function Foo() {
                                             className={`action edit-time project-button icon-button plus`}
                                             data-project-name={project.name}
                                             data-project-index={projectIndex}
-                                            data-day-index={dayIndex}
+                                            data-day-index={dayIndex + dayIndexOffset}
                                         >+</button>}
                                     </div>
 
@@ -300,10 +279,10 @@ export default function Foo() {
                                         className={'action project-button delete'}
                                         data-project-name={project.name}
                                         data-project-index={projectIndex}
-                                        data-day-index={dayIndex}
+                                        data-day-index={dayIndex + dayIndexOffset}
                                     >
                                         <DeleteIcon/>
-                                </button>}
+                                    </button>}
                                 </div>
                                 {areTaskNotEmpty && <div className={'tasks'}>
                                     {project.tasks ?.map((task, taskIndex) => {
@@ -314,7 +293,7 @@ export default function Foo() {
                                             data-project-name={project.name}
                                             data-project-index={projectIndex}
                                             data-task-index={taskIndex}
-                                            data-day-index={dayIndex}
+                                            data-day-index={dayIndex + dayIndexOffset}
                                         >
                                             <span className={'name'}>{task.name}</span>
                                             <div className={'time-container'}>
@@ -323,7 +302,7 @@ export default function Foo() {
                                                     data-project-name={project.name}
                                                     data-project-index={projectIndex}
                                                     data-task-index={taskIndex}
-                                                    data-day-index={dayIndex}
+                                                    data-day-index={dayIndex + dayIndexOffset}
                                                 >-</button>
 
                                                 <span
@@ -337,7 +316,7 @@ export default function Foo() {
                                                     data-project-name={project.name}
                                                     data-project-index={projectIndex}
                                                     data-task-index={taskIndex}
-                                                    data-day-index={dayIndex}
+                                                    data-day-index={dayIndex + dayIndexOffset}
                                                 >+</button>
                                             </div>
 
@@ -346,37 +325,38 @@ export default function Foo() {
                                                 data-project-name={project.name}
                                                 data-project-index={projectIndex}
                                                 data-task-index={taskIndex}
-                                                data-day-index={dayIndex}
+                                                data-day-index={dayIndex + dayIndexOffset}
                                             >
                                                 <DeleteIcon/>
-                                        </button>
+                                            </button>
                                         </div>
                                     })}
                                 </div>}
                             </div>;
                         })}
                         <div className={'new'}>
-                                <div>
-                                    Name*
-                                </div>
-                                <input
-                                    id={'add-new'}
-                                    className={'name'}
-                                />
-                                <br />
-                                <div>
-                                    Group (optional)
-                                </div>
-                                <select
-                                    id={'projects-selection'}
-                                    className={'projects-selection'}
-                                    placeholder={'Project name (optional)'}
-                                >
-                                    <option value={''}></option>
-                                    {day.projects.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                                </select>
-                                <div className={'hint'}>If empty, a project will be added, otherwise a task of a selected project will be created</div>
-                                <br />
+                            <div>
+                                Name*
+                            </div>
+                            <input
+                                id={'add-new'}
+                                className={'name'}
+                            />
+                            <br />
+                            <div>
+                                Group (optional)
+                            </div>
+                            <select
+                                id={'projects-selection'}
+                                className={'projects-selection'}
+                                placeholder={'Project name (optional)'}
+                            >
+                                <option value={''}></option>
+                                {day.projects.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                            </select>
+                            <div className={'hint'}>If empty, a project will be added, otherwise a task of a selected project will be created</div>
+                            <br />
+                            <div className={'buttons'}>
                                 <button onClick={() => {
                                     const inputEl: any = document.getElementById('add-new');
                                     const name = inputEl.value;
@@ -410,42 +390,81 @@ export default function Foo() {
                                     render(days);
                                 }}>+ Add new</button>
                             </div>
+                        </div>
                     </div>
                 </div>;
-            })}
-            <h3>HISTORY</h3>
-            <div className={'days history'}>
-                {days.filter(d => d.date !== toDate(new Date())).map(day => {
-                    return <div className={'day history'} key={day.date}>
-                        <h3>{day.date}</h3>
-                        <div>
-                            {day.projects.map(project => {
-                                const time = round(toHours(project.time), 0.5);
-                                if(time === 0) {
-                                    return null;
-                                }
-                                return <div className={'project history'} key={project.name}>
-                                    <span>{project.name}</span>
-                                    <span>{time === 0 ? '' : time + 'h'}</span>
-                                </div>
-                            })}
-                        </div>
-                        <button
-                            className={'delete'}
-                            onClick={event => {
-                                if (confirm("Are you sure!") == false) {
-                                    event.preventDefault();
-                                    return;
-                                }
+            });
+    }
 
-                                render(days.filter(d => d.date !== day.date));
-                            }}
-                        >
-                            <DeleteIcon/>
-                    </button>
-                    </div>;
-                })}
-            </div>
+    const historyTableData = transformHistoryToTableData(historyDays);
+
+    return <>
+        {showInto && <div
+            className={'intro'}
+            style={{
+                animation: `moveLetterDown 1s ease-in-out ${removeIntroAfter}ms forwards`,
+            }}
+        >
+            {appName.split('').map((ch, index) => {
+                if(ch !== '') {
+                    introDelay += 80;
+                }
+                return <span
+                    key={ch + index}
+                    style={{
+                        animation: `moveLetterDown 1s ease-in-out ${introDelay}ms forwards`,
+                    }}
+                >{ch}</span>
+            })}
+        </div>}
+        <div
+            className={showInto ? 'app' : 'app show'}
+        >
+        <div className={'app-name'}>/ᐠ｡ ｡ᐟ\ {appName}</div>
+        <div className={'days'}>
+
+            {renderEditableDays(todayInArray, 0)}
+            {historyDays.length > 0 && <><h3 className={editHistory ? 'save-button' : 'edit-button'}>HISTORY  {historyDays.length > 0 && <button onClick={()=>{
+                setEditHistory(!editHistory);
+            }}>{editHistory ? 'SAVE' : 'EDIT'}</button>}</h3>
+
+                <div className={'days history'}>
+                    {editHistory ? renderEditableDays(historyDays, 1) : <table>
+                        {historyTableData.map((row, index) => {
+                            if(index === 0) {
+                                return <thead key={'header'+index}>
+                                    <tr>
+                                        {row.map(item => <th
+                                            key={'head_'+item+'_'+index}
+                                        >{item}</th>)}
+                                    </tr>
+                                </thead>
+                            }
+                            return <tbody key={'body'+index}>
+                                <tr>
+                                    {row.map((item, rowIndex) => <td key={item+'_'+index+rowIndex}>{item}</td>)}
+                                </tr>
+                            </tbody>
+
+                        })}
+                        {historyTableData[0] && <tfoot>
+                        <tr>
+                            {historyTableData[0].map((item, index) => <td
+                                className={index === 0 ? '' : 'delete'}
+                                key={'foot_'+item+'_'+index}
+                                onClick={()=>{
+                                    if(!confirm('Are you sure to delete this '+item+'?')) {
+                                        return;
+                                    }
+                                    days.filter(d => d.date !== item);
+                                    render(days);
+                                }}
+                            >{index === 0 ? '' : <><DeleteIcon/></>}</td>)}
+                        </tr>
+                        </tfoot>}
+                    </table>}
+                </div>
+            </>}
         </div>
     </div>
         </>;
@@ -453,5 +472,41 @@ export default function Foo() {
 
 
 function DeleteIcon() {
-    return <img src={'delete-48.png'} />;
+    return <img className="delete-icon" src={'delete-48.png'} />;
+}
+
+function transformHistoryToTableData(days: IDays) {
+
+    let daysNames: string[] = [];
+    let projectsNamesAsObject: Record<string, null> = {};
+
+    days.forEach(day => {
+        daysNames.push(formatStringData(day.date));
+        day.projects.forEach(project => {
+            projectsNamesAsObject[project.name] = null;
+        });
+    });
+    const projectsNames = Object.keys(projectsNamesAsObject);
+
+    const tableData: string[][] = [['', ...daysNames]];
+
+    projectsNames.forEach((projectName, index)=>{
+        const row = [
+            projectName,
+            ...daysNames
+            .map(
+                dayName => {
+                    const projects = days.filter(d => formatStringData(d.date) === dayName)[0].projects.filter(p => p.name === projectName);
+                    if(projects.length === 1) {
+                        const project = projects[0];
+                        return (round(toHours(project.time), 0.5)+'').split('.').join(',');
+                    }
+                    return '0';
+                }
+            )
+        ];
+
+        tableData.push(row);
+    });
+    return tableData;
 }
