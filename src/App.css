@@ -217,6 +217,9 @@ button, input {
 
 }
 
+button.delete {
+    height: 45px;
+}
 
 button.delete img {
     height: 70%;
@@ -233,9 +236,6 @@ button {
     min-height: 60px;
     width: 100%;
     transition: all 400ms;
-}
-button:hover {
-    color:red;
 }
 
 button.delete {
@@ -536,12 +536,6 @@ table .delete-icon {
 }
 h3 {
     border-bottom: 1px solid #DDD;
-}
-
-h3.history {
-    border-bottom: 1px solid #DDD;
-    border-top: 12px dashed #ededed;
-    padding-top: 20px;
 }
 
 .save-button {
