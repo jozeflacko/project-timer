@@ -4,6 +4,7 @@ html, body {
     box-sizing:border-box;
     background: white;
     font-family: monospace;
+    padding-bottom: 50px;
 }
 
 .intro {
@@ -102,12 +103,13 @@ button, input {
 }
 
 .today-header {
-   
+
 }
 
 .today-header h3 {
     margin: 0;
     margin-bottom: 5px;
+    font-size:18px;
 }
 
 .today-header .start-end {
@@ -212,7 +214,7 @@ button, input {
 .task.running{
 
     background: #DDD;
-    
+
 }
 
 
@@ -233,7 +235,7 @@ button {
     transition: all 400ms;
 }
 button:hover {
-   color:red;
+    color:red;
 }
 
 button.delete {
@@ -277,6 +279,7 @@ button.stop {
 
 .project .name {
     position: absolute;
+    top: 6px;
 }
 
 .time {
@@ -349,14 +352,24 @@ button.stop {
 
 .new div {
     color: #777;
+    font-size:16px
 }
 
 .new input {
     font-size: 16px;
+    height: 50px;
+    border-radius: 5px;
+    border:1px solid #777;
+    padding: 0 1em;
 }
 
 .new select {
     font-size: 16px;
+    height: 50px;
+    border-radius: 5px;
+    border:1px solid #777;
+    padding: 0 1em;
+    text-transform: uppercase;
 }
 .new .buttons {
     text-align: right;
@@ -365,18 +378,19 @@ button.stop {
 .new button {
     text-align: right;
     margin: 0;
-    font-size: 1em;
+    font-size: 16px;
     line-height: 1em;
     padding: 0;
-    width: 100px;
+    width: 100%;
     border-radius: 5px;
     display:flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid #eee;
-    background: green;
-    color: white;
-    min-height: 30px;
+    border: 1px solid #777;
+    background: white;
+    color: black;
+    min-height: 50px;
+    box-shadow: 3px 3px 3px #DDD;
 }
 
 .day {
@@ -384,17 +398,14 @@ button.stop {
 }
 .days.history {
     padding: 0;
+    width: 100%;
+    overflow:auto;
 }
 
 .day.history {
     margin-bottom: 20px;
 }
 
-.day.history h3 {
-    margin: 0;
-    padding: 0;
-    font-size:16px;
-}
 
 .day.history button.delete {
     top: -5px;
@@ -405,7 +416,7 @@ button.stop {
 }
 
 div.hint {
-    font-size: 0.8em;
+    font-size: 12px;
     color: #afafaf;
     margin: 2px 0;
 }
@@ -425,7 +436,7 @@ div.hint {
 }
 
 .icon-button:hover {
-   color: red !important;
+    color: red !important;
 }
 
 .time-container {
@@ -492,10 +503,22 @@ div.hint {
     }
 }
 
+table input {
+    border: none;
+    font-size:16px;
+    min-width:50px;
+}
+
 table, th, td {
     border: 1px solid #DDD;
     border-collapse: collapse;
     text-align: center;
+    font-size: 16px;
+    padding: 2px;
+}
+table td:first-child {
+    text-transform: uppercase;
+    text-align: right;
 }
 
 table th {
@@ -513,35 +536,52 @@ table .delete-icon {
 }
 h3 {
     border-bottom: 1px solid #DDD;
-    margin-right: 10px;
+}
+
+h3.history {
+    border-bottom: 1px solid #DDD;
+    border-top: 12px dashed #ededed;
+    padding-top: 20px;
 }
 
 .save-button {
     border-color: green;
+    padding: 10px;
 }
 .save-button button {
     background: green;
     color: white;
+    height: 50px;
+    width: 100%;
+    height: 50px;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1em;
+    padding: 0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #eee;
+    min-height: 50px;
 }
 .edit-button {
     border-color: orange;
+    padding: 10px;
 }
 .edit-button button {
     background: orange;
     color: white;
-}
-
-h3 button {
-    min-height: 0;
-    height: 40px;
-    display: inline-block;
-    float: right;
-    padding: 0 10px;
-    width: auto;
-    cursor: pointer;
-    position: relative;
-    top: -21.5px;
-    left: 10px;
-    cursor: pointer;
-    border-radius: 10px 10px 10px 0;
+    width: 100%;
+    height: 50px;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1em;
+    padding: 0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #eee;
+    min-height: 50px;
 }

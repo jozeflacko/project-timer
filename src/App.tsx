@@ -216,7 +216,7 @@ export default function Foo() {
     const todayInArray = days.filter(d => d.date === toDate(new Date()));
     const historyDays = days.filter(d => d.date !== toDate(new Date()));
 
-    function renderEditableDays(days: IDay[], dayIndexOffset: number = 0) {
+    function renderEditableDays(days: IDay[], dayIndexOffset: number = 0, isToday:boolean) {
         return days.map((day, dayIndex) => {
                 return <div
                     className={'day'}
@@ -224,7 +224,7 @@ export default function Foo() {
                 >
 
                     <div className={'today-header'}>
-                        <h3>Today {day.date}</h3>
+                        <h3>{isToday ? 'Today ' : ''}{day.date}</h3>
                     </div>
                     <div
                         className={'projects'}
@@ -233,18 +233,22 @@ export default function Foo() {
                         {day.projects.map((project, projectIndex) => {
                             const areTaskNotEmpty = project.tasks && project.tasks.length > 0;
                             const projectTime = calculateTime(project.time, project.startTime);
+                            let className = project.startTime ? 'project running' : 'project';
+                            if(isToday) {
+                                className += ' action start-stop project-button';
+                            }
                             return <div
                                 key={project.name}
-                                className={project.startTime ? 'action start-stop project-button project running' : 'action start-stop project-button project'}
+                                className={className}
                                 data-project-name={project.name}
                                 data-project-index={projectIndex}
                                 data-day-index={dayIndex + dayIndexOffset}
                                 style={{
-                                    borderLeftColor: getColor(projectIndex),
+                                    borderLeftColor: isToday ? getColor(projectIndex) : 'white',
                                     borderRightColor: project.startTime ? getColor(projectIndex) : undefined,
                                     borderTopColor: project.startTime ? getColor(projectIndex) : undefined,
                                     borderBottomColor: project.startTime ? getColor(projectIndex) : undefined,
-                                    background: getColor(projectIndex) + '10',
+                                    background: isToday ? (getColor(projectIndex) + '10') : 'white',
                                 }}
                             >
                                 <div
@@ -275,7 +279,7 @@ export default function Foo() {
                                     </div>
 
 
-                                    {!areTaskNotEmpty && <button
+                                    {!areTaskNotEmpty && isToday && <button
                                         className={'action project-button delete'}
                                         data-project-name={project.name}
                                         data-project-index={projectIndex}
@@ -334,7 +338,7 @@ export default function Foo() {
                                 </div>}
                             </div>;
                         })}
-                        <div className={'new'}>
+                        {isToday && <div className={'new'}>
                             <div>
                                 Name*
                             </div>
@@ -354,7 +358,6 @@ export default function Foo() {
                                 <option value={''}></option>
                                 {day.projects.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
                             </select>
-                            <div className={'hint'}>If empty, a project will be added, otherwise a task of a selected project will be created</div>
                             <br />
                             <div className={'buttons'}>
                                 <button onClick={() => {
@@ -388,9 +391,9 @@ export default function Foo() {
                                     }
 
                                     render(days);
-                                }}>+ Add new</button>
+                                }}>Add new</button>
                             </div>
-                        </div>
+                        </div>}
                     </div>
                 </div>;
             });
@@ -423,13 +426,11 @@ export default function Foo() {
         <div className={'app-name'}>/ᐠ｡ ｡ᐟ\ {appName}</div>
         <div className={'days'}>
 
-            {renderEditableDays(todayInArray, 0)}
-            {historyDays.length > 0 && <><h3 className={editHistory ? 'save-button' : 'edit-button'}>HISTORY  {historyDays.length > 0 && <button onClick={()=>{
-                setEditHistory(!editHistory);
-            }}>{editHistory ? 'SAVE' : 'EDIT'}</button>}</h3>
+            {renderEditableDays(todayInArray, 0, true)}
+            {historyDays.length > 0 && <><h3 className={'history'}>HISTORY</h3>
 
                 <div className={'days history'}>
-                    {editHistory ? renderEditableDays(historyDays, 1) : <table>
+                    {editHistory ? renderEditableDays(historyDays, 1, false) : <table>
                         {historyTableData.map((row, index) => {
                             if(index === 0) {
                                 return <thead key={'header'+index}>
@@ -466,6 +467,12 @@ export default function Foo() {
                 </div>
             </>}
         </div>
+            <div className={editHistory ? 'save-button' : 'edit-button'}>
+                {historyDays.length > 0 && <button onClick={()=>{
+                    setEditHistory(!editHistory);
+                }}>{editHistory ? 'SAVE HISTORY' : 'EDIT HISTORY'}</button>}
+            </div>
+
     </div>
         </>;
 }
@@ -499,9 +506,9 @@ function transformHistoryToTableData(days: IDays) {
                     const projects = days.filter(d => formatStringData(d.date) === dayName)[0].projects.filter(p => p.name === projectName);
                     if(projects.length === 1) {
                         const project = projects[0];
-                        return (round(toHours(project.time), 0.5)+'').split('.').join(',');
+                        return (round(toHours(project.time), 0.5)+'').split('.').join(',')+'h';
                     }
-                    return '0';
+                    return '';
                 }
             )
         ];
