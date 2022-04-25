@@ -11,7 +11,6 @@ import {
     round,
     toHours, calculateRunningTime, toTime, toHHMMSS, calculateTime, getColor, formatStringData
 } from "./helpers";
-import useLongPress from './useLongPress';
 
 
 let timer: any = null;
@@ -244,11 +243,11 @@ export default function Foo() {
                                 data-project-index={projectIndex}
                                 data-day-index={dayIndex + dayIndexOffset}
                                 style={{
-                                    borderLeftColor: isToday ? getColor(projectIndex) : 'white',
+                                    borderLeftColor: getColor(projectIndex),
                                     borderRightColor: project.startTime ? getColor(projectIndex) : undefined,
                                     borderTopColor: project.startTime ? getColor(projectIndex) : undefined,
                                     borderBottomColor: project.startTime ? getColor(projectIndex) : undefined,
-                                    background: isToday ? (getColor(projectIndex) + '10') : 'white',
+                                    background: getColor(projectIndex) + '10',
                                 }}
                             >
                                 <div
@@ -291,9 +290,13 @@ export default function Foo() {
                                 {areTaskNotEmpty && <div className={'tasks'}>
                                     {project.tasks ?.map((task, taskIndex) => {
                                         const taskTime = calculateTime(task.time, task.startTime);
+                                        let className = task.startTime ? 'task running' : 'task';
+                                        if(isToday) {
+                                            className += ' action start-stop task-button ';
+                                        }
                                         return <div
                                             key={task.name}
-                                            className={task.startTime ? 'action start-stop task-button task running' : 'action start-stop task-button task'}
+                                            className={className}
                                             data-project-name={project.name}
                                             data-project-index={projectIndex}
                                             data-task-index={taskIndex}
@@ -457,8 +460,11 @@ export default function Foo() {
                                     if(!confirm('Are you sure to delete this '+item+'?')) {
                                         return;
                                     }
-                                    days.filter(d => d.date !== item);
-                                    render(days);
+                                    const _days = days.filter(d => {
+                                        const isIn = d.date !== item;
+                                        return isIn;
+                                    });
+                                    render(_days);
                                 }}
                             >{index === 0 ? '' : <><DeleteIcon/></>}</td>)}
                         </tr>

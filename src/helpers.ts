@@ -28,7 +28,7 @@ export function getDays(): IDays {
 }
 
 export function initLocalStorage() {
-    if (localStorage.getItem('days') == null) {
+    if (true || localStorage.getItem('days') == null) {
         setDays(initDays);
     } else {
         const today = getTodayString();

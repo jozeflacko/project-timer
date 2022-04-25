@@ -34,5 +34,38 @@ export const initDays: IDays = [
                 startTime: null,
             },
         ],
+    },
+    {
+        date: '22.2.',
+        start: '',
+        end: '',
+        isHoliday: false,
+        projects: [
+            {
+                name: 'scrum-teams',
+                time: 0,
+                startTime: null,
+            },
+            {
+                name: 'jam',
+                time: 0,
+                startTime: null,
+            },
+            {
+                name: 'education',
+                time: 0,
+                startTime: null,
+            },
+            {
+                name: 'general',
+                time: 0,
+                startTime: null,
+            },
+            {
+                name: 'stretch & coffee',
+                time: 0,
+                startTime: null,
+            },
+        ],
     }
 ];
